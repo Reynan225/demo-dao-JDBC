@@ -23,6 +23,11 @@ public class application {
 		List<Seller> list = sl.findByDepartment(dep);
 		
 		list.forEach(System.out :: println);
+		
+		System.out.println("=== TEST 3: seller findByAll =====");
+		list = sl.findAll();
+		
+		list.forEach(System.out :: println);
 	}
 
 }

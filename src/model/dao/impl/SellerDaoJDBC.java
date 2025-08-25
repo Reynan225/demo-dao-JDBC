@@ -101,8 +101,54 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public List<Seller> findAll() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		PreparedStatement st = null;
+		ResultSet rs = null;
+
+		// Query para buscar todos os sellers de um departamento específico
+		try {
+
+			st = conn.prepareStatement(
+					
+							  "SELECT seller. *, department.Name as DepName " 
+							+ "FROM seller "
+							+ "INNER JOIN department "
+							+ "ON seller.DepartmentId = department.Id " 
+							+ "ORDER BY Name"		
+					);
+
+			rs = st.executeQuery(); // executa a query
+
+			List<Seller> list = new ArrayList<>();
+			Map<Integer, Department> map = new HashMap<>(); // cache de departamentos
+
+			while (rs.next()) {
+				// Tenta pegar o Department do cache (Map) pelo id
+				Department dep = map.get(rs.getInt("DepartmentId"));
+				map.containsKey(rs.getInt("DepartmentId"));
+				
+				if (dep == null) {
+					// Se não existe ainda, cria e adiciona no Map
+					dep = instantiateDepartment(rs);
+					map.put(rs.getInt("DepartmentId"), dep);
+				}
+				// Cria o Seller associando ao departamento
+				Seller obj = instantiateSeller(rs, dep);
+				list.add(obj);
+
+			}
+
+			return list;
+
+		} catch (SQLException e) {
+
+			throw new DBException("Error" + e.getMessage());
+
+		} finally {
+
+			DB.closeStatement(st);
+			DB.closeResultSet(rs);
+		}
 	}
 
 	@Override
@@ -128,6 +174,7 @@ public class SellerDaoJDBC implements SellerDao {
 				// Tenta pegar o Department do cache (Map) pelo id
 				Department dep = map.get(rs.getInt("DepartmentId"));
 
+				map.containsKey(rs.getInt("DepartmentId"));
 				if (dep == null) {
 					// Se não existe ainda, cria e adiciona no Map
 					dep = instantiateDepartment(rs);

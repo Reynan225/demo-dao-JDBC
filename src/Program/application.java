@@ -35,6 +35,13 @@ public class application {
 		sl.insert(newSeller);
 		
 		System.out.println("Inserted! New id = " + newSeller.getId());
+		
+		System.out.println("=== TEST 5: seller Update =====");
+		seller = sl.findById(1);
+		seller.setName("Martha Waine");
+		sl.update(seller);
+
+		System.out.println("Update completed");
 
 	}
 

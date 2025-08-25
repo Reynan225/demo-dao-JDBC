@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +26,48 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public void insert(Seller obj) {
+
+		PreparedStatement st = null;
+
+		try {
+			st = conn.prepareStatement(
+
+					"INSERT INTO seller " 
+							+ "(Name, Email, BirthDate, BaseSalary, DepartmentId) " 
+							+ "VALUES "
+							+ "(?, ?, ?, ?, ?)",
+					Statement.RETURN_GENERATED_KEYS);
+
+			st.setString(1, obj.getName());
+			st.setString(2, obj.getEmail());
+			st.setDate(3, java.sql.Date.valueOf(obj.getBirthDate()));
+			st.setDouble(4, obj.getBaseSalary());
+			st.setInt(5, obj.getDepartment().getId());
+
+			int rowsAffected = st.executeUpdate();
+
+			if (rowsAffected > 0) {
+
+				ResultSet rs = st.getGeneratedKeys();
+
+				if (rs.next()) {
+
+					int id = rs.getInt(1);
+					obj.setId(id);
+				}
+
+				DB.closeResultSet(rs);
+
+			} else {
+				throw new DBException("Unexpected error! No rows Affected!");
+			}
+
+		} catch (SQLException e) {
+			throw new DBException("Error: " + e.getMessage());
+
+		} finally {
+			DB.closeStatement(st);
+		}
 
 	}
 
@@ -101,7 +144,7 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public List<Seller> findAll() {
-		
+
 		PreparedStatement st = null;
 		ResultSet rs = null;
 
@@ -109,13 +152,11 @@ public class SellerDaoJDBC implements SellerDao {
 		try {
 
 			st = conn.prepareStatement(
-					
-							  "SELECT seller. *, department.Name as DepName " 
-							+ "FROM seller "
+
+							"SELECT seller. *, department.Name as DepName " 
+							+ "FROM seller " 
 							+ "INNER JOIN department "
-							+ "ON seller.DepartmentId = department.Id " 
-							+ "ORDER BY Name"		
-					);
+							+ "ON seller.DepartmentId = department.Id " + "ORDER BY Name");
 
 			rs = st.executeQuery(); // executa a query
 
@@ -126,7 +167,7 @@ public class SellerDaoJDBC implements SellerDao {
 				// Tenta pegar o Department do cache (Map) pelo id
 				Department dep = map.get(rs.getInt("DepartmentId"));
 				map.containsKey(rs.getInt("DepartmentId"));
-				
+
 				if (dep == null) {
 					// Se não existe ainda, cria e adiciona no Map
 					dep = instantiateDepartment(rs);
@@ -161,8 +202,11 @@ public class SellerDaoJDBC implements SellerDao {
 		try {
 
 			st = conn.prepareStatement(
-					"SELECT seller. *, department.Name as DepName " + "FROM seller INNER JOIN department "
-							+ "ON seller.DepartmentId = department.Id " + "WHERE DepartmentId = ? " + "ORDER BY Name");
+							"SELECT seller. *, department.Name as DepName " 
+							+ "FROM seller INNER JOIN department "
+							+ "ON seller.DepartmentId = department.Id " 
+							+ "WHERE DepartmentId = ? " 
+							+ "ORDER BY Name");
 
 			st.setInt(1, department.getId()); // seta o id do departamento
 			rs = st.executeQuery(); // executa a query

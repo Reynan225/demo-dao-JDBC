@@ -10,6 +10,18 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
 # Package Files #
 *.jar
 *.war

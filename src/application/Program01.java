@@ -1,4 +1,4 @@
-package Program;
+package application;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -9,7 +9,7 @@ import model.dao.impl.DaoFactory;
 import model.entities.Department;
 import model.entities.Seller;
 
-public class application {
+public class Program01 {
 
 	public static void main(String[] args) {
 
